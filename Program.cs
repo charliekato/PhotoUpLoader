@@ -1,0 +1,70 @@
+using Microsoft.AspNetCore.Http.Features;
+using System.Diagnostics;
+
+const int port=5540;
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<FormOptions>(ConfigureFormOptions);
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024; ; // 100 MB
+});
+var app = builder.Build();
+
+
+app.UseStaticFiles();
+app.UseRouting();
+
+// アップロード先
+var uploadDir = Path.Combine(GetUploadDirectory(),
+    DateTime.Now.ToString("yyyyMMdd"));
+Directory.CreateDirectory(uploadDir);
+
+// HTMLページ
+app.MapGet("/", async context =>
+{
+    context.Response.ContentType = "text/html; charset=utf-8";
+    await context.Response.WriteAsync( WebPage.UploadPage);
+});
+
+// File upload
+app.MapPost("/upload", async (HttpRequest request) =>
+{
+    //var file = request.Form.Files["file"];
+    foreach (var file in request.Form.Files)
+    {
+
+        if (file == null || file.Length == 0)
+            return Results.BadRequest("File Not Found");
+
+        var filePath = Path.Combine(uploadDir, Path.GetFileName(file.FileName));
+
+        using var stream = File.Create(filePath);
+        await file.CopyToAsync(stream);
+
+    }
+    return Results.Ok("File Uploaded Successfully");
+});
+
+app.Run($"http://0.0.0.0:{port}");
+
+
+
+
+
+static string GetUploadDirectory()
+{
+    string baseDir =
+        Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+
+    string uploadDir = Path.Combine(baseDir, "PhotoDrop");
+
+   // Directory.CreateDirectory(uploadDir);
+    return uploadDir;
+}
+
+static void ConfigureFormOptions(FormOptions options)
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024;
+}
+

@@ -1,0 +1,19 @@
+# ======================
+# .NET build artifacts
+# ======================
+bin/
+obj/
+
+# ======================
+# Visual Studio
+# ======================
+.vs/
+*.user
+*.suo
+
+# ======================
+# ASP.NET Core
+# ======================
+appsettings.Development.json
+
+

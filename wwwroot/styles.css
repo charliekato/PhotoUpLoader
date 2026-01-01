@@ -1,0 +1,98 @@
+body {
+    /*background-color: #ddd;   Backgroud color */
+    color: #222;
+    font-family: Helvetica;
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+    text-align:center;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    font-size: 40px;
+}
+
+button, input[type="submit"] {
+    font-size:40px;
+}
+
+#file {
+    display: none;
+}
+.select-button {
+    font-size:40px;
+    padding: 12px 24px;
+}
+.submit-button {
+    font-size: 28px;
+    padding: 12px 24px;
+}
+
+
+#header h2 {
+    text-align: center;
+    font-size: 40px;
+}
+
+#header form {
+    text-align: center;
+}
+
+
+
+
+*.hide {
+    display: none;
+}
+
+header h1 {
+    font-size: 10px;
+    color: #fff;
+    position: absolute;
+    top: 10px;
+    left:10px;
+}
+header img {
+	width : 600px;
+}
+header .imhere {
+	background-color: royalblue;
+	color: white;
+}
+aside {
+	display: none;
+}
+article {
+	width: 160%;
+}
+/*
+aside address .me {
+    text-align: right;
+}
+*/
+
+.hidelink {
+    display: none;
+    /*
+    text-decoration: none;
+    color: black;
+    cursor: text;
+    */
+}
+
+.del {
+    text-decoration: line-through;
+}
+header nav {
+    width: 160%;
+
+    display: flex;
+    justify-content: space-between;
+}
+footer {
+	text-align: center;
+}
