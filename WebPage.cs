@@ -2,7 +2,85 @@ class WebPage {
     public const string UploadPage = """
 <!DOCTYPE html> <html>  <head>
     <meta charset="utf-8">
-    <link rel ="stylesheet" href="/styles.css">
+    <style>
+
+body {
+    color: #222;
+    font-family: Helvetica;
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
+    text-align:center;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    font-size: 40px;
+}
+
+button, input[type="submit"] {
+    font-size:40px;
+}
+
+#file {
+    display: none;
+}
+.select-button {
+    font-size:40px;
+    padding: 12px 24px;
+}
+.submit-button {
+    font-size: 28px;
+    padding: 12px 24px;
+}
+
+
+#header h2 {
+    text-align: center;
+    font-size: 40px;
+}
+
+#header form {
+    text-align: center;
+}
+
+
+header h1 {
+    font-size: 10px;
+    color: #fff;
+    position: absolute;
+    top: 10px;
+    left:10px;
+}
+
+header .imhere {
+	background-color: royalblue;
+	color: white;
+}
+aside {
+	display: none;
+}
+article {
+	width: 160%;
+}
+.hidelink {
+    display: none;
+}
+
+header nav {
+    width: 160%;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+
+    </style>
+
+
 </head>
 <body>
 <h2>写真UpLoad</h2>
