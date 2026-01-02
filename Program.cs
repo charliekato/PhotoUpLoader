@@ -1,8 +1,22 @@
 using Microsoft.AspNetCore.Http.Features;
 using System.Diagnostics;
+using Serilog;
 
 const int port=5540;
+string appDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+string logPath=Path.Combine( appDir, "PhotoDrop", "log");
+
+Directory.CreateDirectory(logPath);
+string logName = Path.Combine(logPath, "PhotoDrop.log");
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(logName,
+        rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 builder.Services.Configure<FormOptions>(ConfigureFormOptions);
 builder.WebHost.ConfigureKestrel(serverOptions =>
