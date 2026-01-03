@@ -108,7 +108,7 @@ document.getElementById("file").addEventListener("change", function() {
     for (const f of this.files) {
         total += f.size;   // bytes
     }
-    const MAX_SIZE = 50 * 1024 * 1024; // 10 MB
+    const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 
     const totalMB = (total / 1024 / 1024).toFixed(1);
 
