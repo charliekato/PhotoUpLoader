@@ -2,98 +2,109 @@ using Microsoft.AspNetCore.Http.Features;
 using System.Diagnostics;
 using Serilog;
 
-const int port=5540;
-string appDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-string logPath=Path.Combine( appDir, "PhotoDrop", "log");
+class Program {
 
-Directory.CreateDirectory(logPath);
-string logName = Path.Combine(logPath, "PhotoDrop.log");
+    const int port=5540;
+    const long ABSOLUTEMAXSIZE = 100 * 1024 * 1024; // 100 MB
+    const long MAXSIZE = 80 * 1024 * 1024; // 80 MB
+	
+    static void Main(String[] args) {
+	var builder = WebApplication.CreateBuilder(args);
+	if ( args.Length>0 ) {
+	    // log name should be in argument.
+	    string appDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+	    string logPath=Path.Combine( appDir, "PhotoDrop", "log");
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File(logName,
-        rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog();
+	    Directory.CreateDirectory(logPath);
+	    string logName = Path.Combine(logPath, args[0]);
 
-builder.Services.Configure<FormOptions>(ConfigureFormOptions);
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024; ; // 100 MB
-});
-var app = builder.Build();
+	    Log.Logger = new LoggerConfiguration()
+		.MinimumLevel.Information()
+		.WriteTo.Console()
+		.WriteTo.File(logName,
+		    rollingInterval: RollingInterval.Day)
+		.CreateLogger();
+	    builder.Host.UseSerilog();
+	}
+
+	builder.Services.Configure<FormOptions>(ConfigureFormOptions);
+	builder.WebHost.ConfigureKestrel(serverOptions =>
+	{
+	    serverOptions.Limits.MaxRequestBodySize = ABSOLUTEMAXSIZE;
+	});
+	var app = builder.Build();
 
 
-app.UseStaticFiles();
-app.UseRouting();
+	app.UseStaticFiles();
+	app.UseRouting();
 
-// アップロード先
-var uploadDir = Path.Combine(GetUploadDirectory(),
-    DateTime.Now.ToString("yyyyMMdd"));
-Directory.CreateDirectory(uploadDir);
+	// アップロード先
+	var uploadDir = Path.Combine(GetUploadDirectory(),
+	    DateTime.Now.ToString("yyyyMMdd"));
+	Directory.CreateDirectory(uploadDir);
 
-// HTMLページ
-app.MapGet("/", async context =>
-{
-    context.Response.ContentType = "text/html; charset=utf-8";
-    await context.Response.WriteAsync( WebPage.UploadPage);
-});
+	// HTMLページ
+	app.MapGet("/", async context =>
+	{
+	    context.Response.ContentType = "text/html; charset=utf-8";
+	    await context.Response.WriteAsync( WebPage.UploadPage);
+	});
 
-// File upload
-app.MapPost("/upload", async (HttpRequest request) =>
-{
-    //var file = request.Form.Files["file"];
-    foreach (var file in request.Form.Files)
-    {
+	// File upload
+	app.MapPost("/upload", async (HttpRequest request) =>
+	{
+	    //var file = request.Form.Files["file"];
+	    foreach (var file in request.Form.Files)
+	    {
 
-        if (file == null || file.Length == 0)
-            return Results.BadRequest("File Not Found");
+		if (file == null || file.Length == 0)
+		    return Results.BadRequest("File Not Found");
 
-        var filePath = Path.Combine(uploadDir, Path.GetFileName(file.FileName));
+		var filePath = Path.Combine(uploadDir, Path.GetFileName(file.FileName));
 
-        using var stream = File.Create(filePath);
-        await file.CopyToAsync(stream);
+		using var stream = File.Create(filePath);
+		await file.CopyToAsync(stream);
 
+	    }
+	    string html = """
+	<!DOCTYPE html>
+	<html lang="ja">
+	<head>
+	<meta charset="UTF-8">
+	<title>Upload Complete</title>
+	</head>
+	<body style="font-family: sans-serif; text-align: center;">
+	    <h2>アップロードが完了しました</h2>
+	    <button onclick="history.back()" style="font-size: 20px; padding: 10px 30px;">
+		戻る
+	    </button>
+	</body>
+	</html>
+	""";
+	    return Results.Content(html,"text/html; charset=utf-8");
+	});
+
+	app.Run($"http://0.0.0.0:{port}");
     }
-    string html = """
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>Upload Complete</title>
-</head>
-<body style="font-family: sans-serif; text-align: center;">
-    <h2>アップロードが完了しました</h2>
-    <button onclick="history.back()" style="font-size: 20px; padding: 10px 30px;">
-        戻る
-    </button>
-</body>
-</html>
-""";
-    return Results.Content(html,"text/html; charset=utf-8");
-});
-
-app.Run($"http://0.0.0.0:{port}");
 
 
 
 
 
-static string GetUploadDirectory()
-{
-    string baseDir =
-        Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+    static string GetUploadDirectory()
+    {
+	string baseDir =
+	    Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
-    string uploadDir = Path.Combine(baseDir, "PhotoDrop");
+	string uploadDir = Path.Combine(baseDir, "PhotoDrop");
 
-   // Directory.CreateDirectory(uploadDir);
-    return uploadDir;
+       // Directory.CreateDirectory(uploadDir);
+	return uploadDir;
+    }
+
+    static void ConfigureFormOptions(FormOptions options)
+    {
+	options.MultipartBodyLengthLimit = MAXSIZE;
+    }
+
 }
-
-static void ConfigureFormOptions(FormOptions options)
-{
-    options.MultipartBodyLengthLimit = 100 * 1024 * 1024;
-}
-
