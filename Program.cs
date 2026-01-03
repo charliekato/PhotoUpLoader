@@ -57,7 +57,22 @@ app.MapPost("/upload", async (HttpRequest request) =>
         await file.CopyToAsync(stream);
 
     }
-    return Results.Ok("File Uploaded Successfully");
+    string html = """
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Upload Complete</title>
+</head>
+<body style="font-family: sans-serif; text-align: center;">
+    <h2>アップロードが完了しました</h2>
+    <button onclick="history.back()" style="font-size: 20px; padding: 10px 30px;">
+        戻る
+    </button>
+</body>
+</html>
+""";
+    return Results.Content(html,"text/html; charset=utf-8");
 });
 
 app.Run($"http://0.0.0.0:{port}");
